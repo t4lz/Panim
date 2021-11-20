@@ -49,22 +49,23 @@ let OnPeerConnection = (c) => {
 
 /// UI.
 
-let btnCopyUrlToShare = () => $('#btn-copy-url-to-share')
-let inpUrlToShare = () => $('#url-to-share')
+let GetBtnCopyUrlToShare = () => $('#btn-copy-url-to-share')
+
+let GetInpUrlToShare = () => $('#url-to-share')
 
 let OnClickCopyUrlToShare = () => {
-    navigator.clipboard.writeText(inpUrlToShare().val()).then(() => {
-        btnCopyUrlToShare().trigger('copied')
+    navigator.clipboard.writeText(GetInpUrlToShare().val()).then(() => {
+        GetBtnCopyUrlToShare().trigger('copied')
     })
 }
 
 let OnClickUrlToShare = () => {
-    inpUrlToShare().select()
+    GetInpUrlToShare().select()
 }
 
 let OnCopiedCopyUrlToShare = () => {
-    let originalText = btnCopyUrlToShare().attr('data-bs-original-title')
-    btnCopyUrlToShare()
+    let originalText = GetBtnCopyUrlToShare().attr('data-bs-original-title')
+    GetBtnCopyUrlToShare()
         .attr('data-bs-original-title', 'Copied!')
         .tooltip('show')
         .attr('data-bs-original-title', originalText)
@@ -90,8 +91,8 @@ let InitPeerToPeer = (OnConnect, OnReceive) => {
     peer.on('connection', OnPeerConnection)
 
     // Init UI.
-    btnCopyUrlToShare().tooltip();
-    btnCopyUrlToShare().click(OnClickCopyUrlToShare)
-    inpUrlToShare().click(OnClickUrlToShare)
-    btnCopyUrlToShare().bind('copied', OnCopiedCopyUrlToShare);
+    GetBtnCopyUrlToShare().tooltip();
+    GetBtnCopyUrlToShare().click(OnClickCopyUrlToShare)
+    GetInpUrlToShare().click(OnClickUrlToShare)
+    GetBtnCopyUrlToShare().bind('copied', OnCopiedCopyUrlToShare);
 }

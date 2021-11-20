@@ -12,11 +12,19 @@ let OnConnect = (userId) => {
 }
 
 let OnReceive = (data) => {
-    PrintLog("Received '" + data + "'")
+    PrintLog("Received '" + JSON.stringify(data) + "'")
 }
 
+let OnFaceLandmarksReady = () => {
+    PrintLog("Facial landmarks ready")
+}
+
+let OnFaceLandmarksDetected = (landmarks) => {
+    Send(landmarks)
+}
 
 $(document).ready(() => {
     InitPeerToPeer(OnConnect, OnReceive)
+    InitFaceLandmarksDetection(OnFaceLandmarksReady, OnFaceLandmarksDetected)
     $('#btn-send').click(OnClickSend)
 })

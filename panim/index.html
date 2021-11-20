@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
 
-<<<<<<< HEAD
     <!-- Require the peer dependencies of face-landmarks-detection. -->
     <script src="https://unpkg.com/@tensorflow/tfjs-core@2.4.0/dist/tf-core.js"></script>
     <script src="https://unpkg.com/@tensorflow/tfjs-converter@2.4.0/dist/tf-converter.js"></script>
@@ -17,38 +16,27 @@
     <!-- You must explicitly require a TF.js backend if you're not using the tfjs union bundle. -->
     <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.4.0/dist/tf-backend-webgl.js"></script>
     <script src="https://unpkg.com/@tensorflow/tfjs-backend-cpu@2.4.0/dist/tf-backend-cpu.js"></script>
-    <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.4.0/dist/tf-backend-wasm.js"></script> -->
 
     <!-- Require face-landmarks-detection itself. -->
     <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@0.0.1/dist/face-landmarks-detection.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
-            integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
-            crossorigin="anonymous" defer>
-    </script>
-=======
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js" integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ==" crossorigin="anonymous" defer></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
->>>>>>> p2p works
 
+    <!-- Require PeerJS -->
     <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+
     <script src="js/peer-to-peer.js"></script>
+    <!-- <script src="js/webgl-render.js"></script> -->
+    <script src="js/face-landmarks-detection.js"></script>
     <script src="js/main.js"></script>
 </head>
 
 <body>
-<<<<<<< HEAD
-    <video id="player" autoplay playsinline></video>
-    <canvas id="glcanvas" width="640" height="480"></canvas>
 
-    <script src="js/webgl-render.js"></script>
-    <script src="js/face-landmarks-detection.js"></script>
-    
-    
-    <h1>Welcome to Panim</h1>
-    <p>Share this link to invite your friends <span id="url-to-share" class="copyable"></span></p>
-    <input type="button" value="Say hi!" id='btn-send' />
-    <p id='log'></p>
-=======
+    <!-- <canvas id="glcanvas" width="640" height="480"></canvas> -->
+
     <div class="container">
         <div class="row">
             <div class="col">
@@ -62,12 +50,18 @@
         </div>
         <div class="row">
             <div class="col">
+                <video id="video-self" autoplay playsinline />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
                 <input type="button" value="Say hi!" id='btn-send' />
                 <p id='log'></p>
             </div>
         </div>
     </div>
->>>>>>> p2p works
+
+
 </body>
 
 </html>
