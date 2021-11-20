@@ -45,7 +45,11 @@ let InitCamera = async() => {
 }
 
 let InitModel = async() => {
-    model = await faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh)
+    let package = faceLandmarksDetection.SupportedPackages.mediapipeFacemesh
+    let config = {
+        maxFaces: 1,
+    }
+    model = await faceLandmarksDetection.load(package, config)
 }
 
 let InitFaceLandmarksDetection = async(OnFaceLandmarksReady, OnFaceLandmarksDetected) => {

@@ -1,15 +1,10 @@
-/// Common utils.
-
-Assert = (condition, msg) => {
-    if (!condition) throw msg
-}
-
 /// State. 
 
 var gl = null
 var positionBuffer = null
 var textureCoordBuffer = null
 var indexBuffer = null
+var indexBufferSize = null
 var texture = null
 
 /// Shader programs.
@@ -73,83 +68,6 @@ let GetProgramInfo = (shaderProgram) => {
     }
 }
 
-/// Buffer and texture data.
-
-const TEXTURE_URL = "cubetexture.png"
-
-const VERTEX_POSITIONS = [
-    // Front face
-    -1.0, -1.0, 1.0,
-    1.0, -1.0, 1.0,
-    1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
-
-    // Back face
-    -1.0, -1.0, -1.0, -1.0, 1.0, -1.0,
-    1.0, 1.0, -1.0,
-    1.0, -1.0, -1.0,
-
-    // Top face
-    -1.0, 1.0, -1.0, -1.0, 1.0, 1.0,
-    1.0, 1.0, 1.0,
-    1.0, 1.0, -1.0,
-
-    // Bottom face
-    -1.0, -1.0, -1.0,
-    1.0, -1.0, -1.0,
-    1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
-
-    // Right face
-    1.0, -1.0, -1.0,
-    1.0, 1.0, -1.0,
-    1.0, 1.0, 1.0,
-    1.0, -1.0, 1.0,
-
-    // Left face
-    -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
-];
-
-const VERTEX_TEXTURE_COORDS = [
-    // Front
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Back
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Top
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Bottom
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Right
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-    // Left
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-];
-
-const VERTEX_INDICES = [
-    0, 1, 2, 0, 2, 3, // front
-    4, 5, 6, 4, 6, 7, // back
-    8, 9, 10, 8, 10, 11, // top
-    12, 13, 14, 12, 14, 15, // bottom
-    16, 17, 18, 16, 18, 19, // right
-    20, 21, 22, 20, 22, 23, // left
-];
-
 /// Populate buffer and texture data
 
 let PopulateTexture = (url) => {
@@ -172,7 +90,8 @@ let PopulateTexture = (url) => {
         gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     };
     image.src = url
 }
@@ -193,9 +112,17 @@ let PopulateTextureCoordBuffer = (textureCoords) => {
 
 let PopulateIndexBuffer = (indices) => {
     if (!indexBuffer)
-        indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+        indexBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
+    indexBufferSize = indices.length
+}
+
+/// Conversions.
+
+let LandmarksToPositionArray = (landmarks) => {
+    Assert(landmarks.length > 0, "Expect at least one face.")
+    return landmarks[0].scaledMesh.flat()
 }
 
 
@@ -226,30 +153,35 @@ let PopulateIndexBuffer = (indices) => {
 
 
 
+let GetCanvasWebGL = () => $('#canvas-webgl')
 
 
 
 
 
-//
-// Start here
-//
 function InitWebGLStuff() {
-    let canvas = $('#gl-canvas').get(0)
+
+    console.log(FACE_MESH_POSITIONS.length)
+    console.log(FACE_MESH_TEXTURE_COORDS.length)
+    console.log(FACE_MESH_INDICES.length)
+
+
+
+    let canvas = GetCanvasWebGL().get(0)
     gl = canvas.getContext('webgl')
+
 
     let shaderProgram = CompileShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_PROGRAM);
     let programInfo = GetProgramInfo(shaderProgram)
 
-    PopulateTexture(TEXTURE_URL)
-    PopulatePositionBuffer(VERTEX_POSITIONS)
-    PopulateTextureCoordBuffer(VERTEX_TEXTURE_COORDS)
-    PopulateIndexBuffer(VERTEX_INDICES)
+    PopulateTexture(FACE_MESH_TEXTURE_URL)
+    PopulatePositionBuffer(FACE_MESH_POSITIONS)
+    PopulateTextureCoordBuffer(FACE_MESH_TEXTURE_COORDS)
+    PopulateIndexBuffer(FACE_MESH_INDICES)
 
     Render(programInfo);
 
 }
-
 
 
 
@@ -299,12 +231,16 @@ function Render(programInfo) {
     // Create projection matrix.
     let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
     let projectionMatrix = mat4.create()
-    mat4.perspective(projectionMatrix, 0.75, aspect, 0.001, 100.0)
+    mat4.perspective(projectionMatrix, 0.75, aspect, 0.001, 5000.0)
+        // mat4.ortho(projectionMatrix, -600, 600, -600, 600, -600, 600)
 
     // Create view matrix.
     let modelViewMatrix = mat4.create();
-    mat4.translate(modelViewMatrix, modelViewMatrix, [0.0, 0.0, -10.0])
-    mat4.rotate(modelViewMatrix, modelViewMatrix, alpha, [0, 1, 0])
+    // let dx = -FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[0]]
+    // let dy = -FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[1]]
+    // let dz = -400 - FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[2]]
+    mat4.scale(modelViewMatrix, modelViewMatrix, [1, -1, 1])
+    mat4.translate(modelViewMatrix, modelViewMatrix, [-100, -100, -1000])
 
     // Propagate the vertex positions.
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -338,7 +274,7 @@ function Render(programInfo) {
     gl.useProgram(programInfo.program);
 
     // Finally, draw the elements.
-    gl.drawElements(gl.TRIANGLES, VERTEX_INDICES.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, indexBufferSize, gl.UNSIGNED_SHORT, 0);
 
     // On to the next frame.
     requestAnimationFrame(() => Render(programInfo))

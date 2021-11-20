@@ -1,3 +1,7 @@
+let Assert = (condition, msg) => {
+    if (!condition) throw msg
+}
+
 let OnClickSend = () => {
     Send("Hi!")
 }
@@ -21,6 +25,7 @@ let OnFaceLandmarksReady = () => {
 
 let OnFaceLandmarksDetected = (landmarks) => {
     Send(landmarks)
+    PopulatePositionBuffer(LandmarksToPositionArray(landmarks))
 }
 
 $(document).ready(() => {
