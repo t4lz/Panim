@@ -1,4 +1,4 @@
-# Panim - Avatar based communication service
+# [Panim](https://t4lz.github.io/Panim/) - Avatar based communication service
 This is developed as a part of [Hackatum](https://hack.tum.de "Hackatum's Website").
 
 
