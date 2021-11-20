@@ -1,4 +1,7 @@
-function initBuffers(gl) {
+var cubeRotation = 0.0;
+
+// adapted from https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Creating_3D_objects_using_WebGL
+function initBuffers(gl, avatarLandmarks) {
     // Create a buffer for the cube's vertex positions.
     const positionBuffer = gl.createBuffer();
 
@@ -7,6 +10,7 @@ function initBuffers(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
     // Now create an array of positions for the cube.
+    // measured 3d landmarks
     const positions = new Array(468*3);
 
     // Now pass the list of positions into WebGL to build the
@@ -16,13 +20,11 @@ function initBuffers(gl) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
     // Now set up the texture coordinates for the faces.
-
     const textureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
 
-    const textureCoordinates = new Array(468*2);
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+    // one time 2d landmarks of avatar.
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(avatarLandmarks.flat(1)),
         gl.STATIC_DRAW);
 
     // Build the element array buffer; this specifies the indices
@@ -94,7 +96,7 @@ function loadTexture(gl, url) {
     };
     image.src = url;
 
-    return texture;
+    return [texture, image];
 }
 
 function isPowerOf2(value) {
@@ -105,7 +107,7 @@ function isPowerOf2(value) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, texture, deltaTime) {
+function drawScene(gl, programInfo, buffers, texture, deltaTime, landmarks) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
     gl.clearDepth(1.0);                 // Clear everything
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
@@ -146,14 +148,14 @@ function drawScene(gl, programInfo, buffers, texture, deltaTime) {
     mat4.translate(modelViewMatrix,     // destination matrix
         modelViewMatrix,     // matrix to translate
         [-0.0, 0.0, -6.0]);  // amount to translate
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     cubeRotation,     // amount to rotate in radians
-    //     [0, 0, 1]);       // axis to rotate around (Z)
-    // mat4.rotate(modelViewMatrix,  // destination matrix
-    //     modelViewMatrix,  // matrix to rotate
-    //     cubeRotation * .7,// amount to rotate in radians
-    //     [0, 1, 0]);       // axis to rotate around (X)
+    mat4.rotate(modelViewMatrix,  // destination matrix
+        modelViewMatrix,  // matrix to rotate
+        cubeRotation,     // amount to rotate in radians
+        [0, 0, 1]);       // axis to rotate around (Z)
+    mat4.rotate(modelViewMatrix,  // destination matrix
+        modelViewMatrix,  // matrix to rotate
+        cubeRotation * .7,// amount to rotate in radians
+        [0, 1, 0]);       // axis to rotate around (X)
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
@@ -164,6 +166,9 @@ function drawScene(gl, programInfo, buffers, texture, deltaTime) {
         const stride = 0;
         const offset = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+        let positions = landmarks.flat(1)
+        console.log(positions)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
         gl.vertexAttribPointer(
             programInfo.attribLocations.vertexPosition,
             numComponents,
@@ -233,7 +238,7 @@ function drawScene(gl, programInfo, buffers, texture, deltaTime) {
 
     // Update the rotation for the next draw
 
-    // cubeRotation += deltaTime;
+    cubeRotation += deltaTime;
 }
 
 //

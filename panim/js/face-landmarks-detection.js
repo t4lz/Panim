@@ -214,7 +214,7 @@ async function setupCamera() {
 async function doModelStuff() {
     // adapted from https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/README.md#usage
     // Load the MediaPipe Facemesh package.
-    console.log("dMS!")
+    // console.log("dMS!")
     const model = await faceLandmarksDetection.load(
         faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
 
@@ -256,22 +256,23 @@ async function doModelStuff() {
           }
         ]
         */
-
-
-        for (let i = 0; i < predictions.length; i++) {
-            const keypoints = predictions[i].scaledMesh;
-
-            // Log facial keypoints.
-            for (let i = 0; i < keypoints.length; i++) {
-                const [x, y, z] = keypoints[i];
-
-                console.log(`Keypoint ${i}: [${x}, ${y}, ${z}]`);
-            }
-        }
-        console.log(predictions.length > 1);
-        console.log(predictions);
+        // console.log(predictions.length > 1);
         return predictions[0];
     }
+}
+
+async function getImageLandmarks(url) {
+    // adapted from https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/README.md#usage
+    const model = await faceLandmarksDetection.load(
+        faceLandmarksDetection.SupportedPackages.mediapipeFacemesh);
+    const predictions = await model.estimateFaces({
+        input: url
+    });
+    if (predictions.length === 0) {
+        alert("Can't predict landmarks, please choose a different avatar.");
+        return null;
+    }
+    return predictions[0].scaledMesh;
 }
 
 async function main() {
@@ -336,23 +337,25 @@ async function main() {
         }
     };
 
+    let avatarUrl = "Einstein.jpg"
+
     // Here's where we call the routine that builds all the
     // objects we'll be drawing.
-    const buffers = initBuffers(gl);
+    const [texture, image] = loadTexture(gl, avatarUrl);
+    let avatarLandmarks = await getImageLandmarks(image);
+    const buffers = initBuffers(gl, avatarLandmarks.map(xyzArray => [xyzArray[0], xyzArray[1]]));
 
-    const texture = loadTexture(gl, 'cubetexture.png');
 
     var then = 0;
 
     // Draw the scene repeatedly
-    function render(now) {
-        let predictions = doModelStuff();
-        console.log(predictions);
+    async function render(now) {
+        let predictions = await doModelStuff();
         now *= 0.001;  // convert to seconds
         const deltaTime = now - then;
         then = now;
 
-        drawScene(gl, programInfo, buffers, texture, deltaTime);
+        drawScene(gl, programInfo, buffers, texture, deltaTime, predictions.scaledMesh);
 
         requestAnimationFrame(render);
     }
