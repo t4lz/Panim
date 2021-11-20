@@ -45,7 +45,7 @@ let OnPeerOpen = (userId) => {
 
     // Immediately connect if we are given a peer to connect to.
     let params = new URLSearchParams(window.location.search);
-    let connectToPeer = params.get('connect-to-peer')
+    let connectToPeer = params.get('id')
     if (connectToPeer) {
         conn = peer.connect(connectToPeer);
         setCall(conn);
@@ -102,7 +102,7 @@ let OnCopiedCopyUrlToShare = () => {
 
 let UpdateUrlToShare = (userId) => {
     let loc = window.location
-    let url = loc.protocol + "//" + loc.host + loc.pathname + "?connect-to-peer=" + userId
+    let url = loc.protocol + "//" + loc.host + loc.pathname + "?id=" + userId
     $('#url-to-share').val(url)
 }
 
