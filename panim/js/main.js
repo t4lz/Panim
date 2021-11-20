@@ -27,4 +27,6 @@ $(document).ready(() => {
     InitPeerToPeer(OnConnect, OnReceive)
     InitFaceLandmarksDetection(OnFaceLandmarksReady, OnFaceLandmarksDetected)
     $('#btn-send').click(OnClickSend)
+
+    InitWebGLStuff()
 })
