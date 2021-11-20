@@ -1,70 +1,97 @@
+/// State.
+
 var peer = null
 var conn = null
+var cbkOnConnect = null
+var cbkOnReceive = null
 
-let RenderUrlToShare = (userId) => {
-    let loc = window.location
-    let url = loc.protocol + "//" + loc.host + loc.pathname + "?connect-to-peer=" + userId
-    document.getElementById('url-to-share').innerHTML = url
-}
+// Manage connection, sending, and receiving.
 
-let GetUrlParameters = () => {
-    let params = new URLSearchParams(window.location.search);
-    return {
-        connectToPeer: params.get('connect-to-peer'),
-    }
-}
-
-let CopyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard')
-    })
-}
-
-let OnClickUrlToShare = () => {
-    CopyToClipboard(document.getElementById('url-to-share').innerHTML)
-}
-
-let OnClickSend = () => {
-    if (conn) {
-        conn.send("Hi!")
-    }
-}
-
-let PrintLog = (line) => {
-    document.getElementById('log').innerHTML += line + "<br/>"
+let Send = (data) => {
+    if (!conn || !conn.open)
+        return false
+    conn.send(data)
+    return true
 }
 
 let OnConnData = (data) => {
-    PrintLog("Received '" + data + "'")
+    console.log("Received '" + data + "'")
+    if (cbkOnReceive)
+        cbkOnReceive(data)
 }
 
 let OnPeerOpen = (userId) => {
-    RenderUrlToShare(userId)
+    UpdateUrlToShare(userId)
 
     // Immediately connect if we are given a peer to connect to.
-    let params = GetUrlParameters()
-    if (params.connectToPeer) {
-        conn = peer.connect(params.connectToPeer);
+    let params = new URLSearchParams(window.location.search);
+    let connectToPeer = params.get('connect-to-peer')
+    if (connectToPeer) {
+        conn = peer.connect(connectToPeer);
         conn.on('data', OnConnData);
-        PrintLog("Connected to '" + params.connectToPeer + "'")
+        console.log("Connected to " + connectToPeer)
+        if (cbkOnConnect)
+            cbkOnConnect(connectToPeer)
     }
 }
 
 let OnPeerConnection = (c) => {
-
-    // Allow only a single connection.
     if (conn && conn.open) {
         c.close()
         return
     }
-
     conn = c
     conn.on('data', OnConnData);
-    PrintLog("Connected to '" + conn.peer + "'")
+    console.log("Connected to " + conn.peer)
+    if (cbkOnConnect)
+        cbkOnConnect(conn.peer)
 }
 
-let InitPeerToPeer = () => {
+/// UI.
+
+let btnCopyUrlToShare = () => $('#btn-copy-url-to-share')
+let inpUrlToShare = () => $('#url-to-share')
+
+let OnClickCopyUrlToShare = () => {
+    navigator.clipboard.writeText(inpUrlToShare().val()).then(() => {
+        btnCopyUrlToShare().trigger('copied')
+    })
+}
+
+let OnClickUrlToShare = () => {
+    inpUrlToShare().select()
+}
+
+let OnCopiedCopyUrlToShare = () => {
+    let originalText = btnCopyUrlToShare().attr('data-bs-original-title')
+    btnCopyUrlToShare()
+        .attr('data-bs-original-title', 'Copied!')
+        .tooltip('show')
+        .attr('data-bs-original-title', originalText)
+}
+
+let UpdateUrlToShare = (userId) => {
+    let loc = window.location
+    let url = loc.protocol + "//" + loc.host + loc.pathname + "?connect-to-peer=" + userId
+    $('#url-to-share').val(url)
+}
+
+/// Initialization.
+
+let InitPeerToPeer = (OnConnect, OnReceive) => {
+
+    // Init callbacks.
+    cbkOnConnect = OnConnect
+    cbkOnReceive = OnReceive
+
+    // Init PeerJS.
     peer = new Peer()
     peer.on('open', OnPeerOpen)
     peer.on('connection', OnPeerConnection)
+
+    // Init UI.
+    btnCopyUrlToShare().tooltip();
+    btnCopyUrlToShare().click(OnClickCopyUrlToShare)
+    inpUrlToShare().click(OnClickUrlToShare)
+    btnCopyUrlToShare().bind('copied', OnCopiedCopyUrlToShare);
 }
