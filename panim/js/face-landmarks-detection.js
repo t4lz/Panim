@@ -98,8 +98,8 @@ async function doModelStuff() {
                 console.log(`Keypoint ${i}: [${x}, ${y}, ${z}]`);
             }
         }
-        rafID = requestAnimationFrame(doModelStuff);
     }
+    rafID = requestAnimationFrame(doModelStuff);
 }
 
 async function main() {
