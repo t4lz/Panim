@@ -20,6 +20,27 @@ let OnConnData = (data) => {
         cbkOnReceive(data)
 }
 
+let OnIncomingStream = (incomingStream) => {
+    console.log("Playing incoming stream.")
+    // `stream` is the MediaStream of the remote peer.
+    // Here you'd add it to an HTML video/canvas element.
+    const audio = document.createElement('audio');
+    audio.style.display = "none";
+    document.body.appendChild(audio);
+    audio.srcObject = incomingStream;
+    audio.play();
+}
+
+
+let setCall = () => {
+    console.log("initiation call to " + conn.peer);
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (outgoingStream) {
+        let call = peer.call(conn.peer, outgoingStream);
+        call.on('stream', OnIncomingStream);
+        }
+    );
+}
+
 let OnPeerOpen = (userId) => {
     UpdateUrlToShare(userId)
 
@@ -28,11 +49,20 @@ let OnPeerOpen = (userId) => {
     let connectToPeer = params.get('connect-to-peer')
     if (connectToPeer) {
         conn = peer.connect(connectToPeer);
+        setCall(conn);
         conn.on('data', OnConnData);
         console.log("Connected to " + connectToPeer)
         if (cbkOnConnect)
             cbkOnConnect(connectToPeer)
     }
+}
+
+let OnIncomingCall = (call) => {
+    console.log("answering incoming call");
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (outgoingStream) {
+        call.answer(outgoingStream);
+    });
+    call.on('stream', OnIncomingStream);
 }
 
 let OnPeerConnection = (c) => {
@@ -89,6 +119,8 @@ let InitPeerToPeer = (OnConnect, OnReceive) => {
     peer = new Peer()
     peer.on('open', OnPeerOpen)
     peer.on('connection', OnPeerConnection)
+    peer.on('call', OnIncomingCall);
+
 
     // Init UI.
     GetBtnCopyUrlToShare().tooltip();
