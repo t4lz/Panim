@@ -1,0 +1,10 @@
+body {
+    font-family: sans-serif;
+}
+
+.copyable {
+    background-color: lightgray;
+    color: darkblue;
+    cursor: pointer;
+    font-weight: bold;
+}
