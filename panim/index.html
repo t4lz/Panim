@@ -16,12 +16,20 @@
 
     <!-- Require face-landmarks-detection itself. -->
     <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@0.0.1/dist/face-landmarks-detection.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+            integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+            crossorigin="anonymous" defer>
+    </script>
+
     <script src="js/peer-to-peer.js"></script>
 </head>
 
 <body>
     Lala.
     <video id="player" autoplay playsinline></video>
+    <canvas id="glcanvas" width="640" height="480"></canvas>
+
+    <script src="js/webgl-render.js"></script>
     <script src="js/face-landmarks-detection.js"></script>
 </body>
 
