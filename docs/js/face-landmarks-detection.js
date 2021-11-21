@@ -3,7 +3,10 @@
 var model = null
 var cbkOnFaceLandmarksDetected = null
 var cbkOnFaceLandmarksReady = null
-var imageCapture;
+var imageCapture = null;
+var myAvatarCanvas = null;
+var myAvatarBlob = null;
+var myAvatarCoords = null;
 
 /// UI.
 
@@ -16,30 +19,41 @@ let OnClickTakeSnapshot = () => {
     imageCapture.grabFrame()
         .then(imageBitmap => {
             console.log(imageBitmap);
+            // bitmap to blob creation adapted from: https://stackoverflow.com/a/52959897
             return new Promise(res => {
-                // create a canvas
-                const canvas = document.createElement('canvas');
-                // resize it to the size of our ImageBitmap
-                canvas.width = imageBitmap.width;
-                canvas.height = imageBitmap.height;
-                // try to get a bitmaprenderer context
-                let ctx = canvas.getContext('bitmaprenderer');
+                myAvatarCanvas = document.createElement('canvas');
+                myAvatarCanvas.width = imageBitmap.width;
+                myAvatarCanvas.height = imageBitmap.height;
+                let ctx = myAvatarCanvas.getContext('bitmaprenderer');
                 if(ctx) {
-                    // transfer the ImageBitmap to it
                     ctx.transferFromImageBitmap(imageBitmap);
                 }
                 else {
-                    // in case someone supports createImageBitmap only
-                    // twice in memory...
-                    canvas.getContext('2d').drawImage(imageBitmap,0,0);
+                    myAvatarCanvas.getContext('2d').drawImage(imageBitmap,0,0);
                 }
-                // get it back as a Blob
-                return canvas.toBlob(res);
+                myAvatarCanvas.toBlob(res);
             });
-        }).then(blob => {
+        }).then(async blob => {
         console.log('blob:');
         console.log(blob);
-        Send({snapshot: blob});
+        let predictions = await model.estimateFaces({
+            input: myAvatarCanvas,
+            returnTensors: false,
+            flipHorizontal: false,
+            predictIrises: true,
+        });
+        console.log(predictions);
+        if (predictions.length > 0) {
+            var avatarCanvas = document.getElementById("canvas-my-avatar");
+            var context = avatarCanvas.getContext('2d');
+            context.drawImage(myAvatarCanvas, 0, 0, 100, 100); // draw also on small canvas for user to see.
+            let landmarks = predictions[0].scaledMesh;
+            myAvatarCoords = landmarks.map(point => [point[0] / myAvatarCanvas.width, point[1] / myAvatarCanvas.height]).flat();
+            myAvatarBlob = blob;
+            Send({snapshot: myAvatarBlob, coordinates: myAvatarCoords});
+        } else {
+            alert("Sorry, could not detect a face in the frame, please try again.");
+        }
     }).catch(error => console.log(error));
 }
 

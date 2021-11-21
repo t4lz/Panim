@@ -9,8 +9,9 @@ var peerAvatar = null;
 // Manage connection, sending, and receiving.
 
 let Send = (data) => {
-    if (!conn || !conn.open)
+    if (!conn || !conn.open) {
         return false
+    }
     conn.send(data)
     if ('snapshot' in data) {
         console.log("sent snapshot!")
@@ -24,6 +25,10 @@ let OnConnData = (data) => {
         console.log("got snapshot!")
         console.log(data.snapshot);
         SetNewTextureFromBlob(data.snapshot);
+    }
+    if ('coordinates' in data) {
+        console.log(data.coordinates);
+        PopulateTextureCoordBuffer(data.coordinates);
     }
     if (cbkOnReceive)
         cbkOnReceive(data)
@@ -60,6 +65,7 @@ let OnPeerOpen = (userId) => {
         setCall(conn);
         conn.on('data', OnConnData);
         console.log("Connected to " + connectToPeer)
+        SendMyAvatar();
         if (cbkOnConnect)
             cbkOnConnect(connectToPeer)
     }
@@ -71,6 +77,14 @@ let OnIncomingCall = (call) => {
         call.answer(outgoingStream);
     });
     call.on('stream', OnIncomingStream);
+    SendMyAvatar();
+}
+
+let SendMyAvatar = () => {
+    if (myAvatarBlob != null && myAvatarCoords != null) {
+        console.log("sending my avatar to peer");
+        Send({snapshot: myAvatarBlob, coordinates: myAvatarCoords});
+    }
 }
 
 let OnPeerConnection = (c) => {
@@ -81,6 +95,7 @@ let OnPeerConnection = (c) => {
     conn = c
     conn.on('data', OnConnData);
     console.log("Connected to " + conn.peer)
+    SendMyAvatar();
     if (cbkOnConnect)
         cbkOnConnect(conn.peer)
 }
@@ -116,8 +131,6 @@ let UpdateUrlToShare = (userId) => {
 }
 
 let SetNewTextureFromBlob = (blob) => {
-    console.log('Setting new texture from blob:')
-    console.log(blob)
     peerAvatar = new Blob([blob]);
     // adapted from https://stackoverflow.com/a/27737668
     var urlCreator = window.URL || window.webkitURL;
