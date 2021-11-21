@@ -29,5 +29,7 @@ We use [a pre-trained TensorFlow.js model](https://www.npmjs.com/package/@tensor
 
 #### Peer to Peer Communication
 The peer to peer communication is done with [PeerJS](https://peerjs.com/), with connections borkered by _PeerServer Cloud_.
-
 The audio is sent as is, but no video is sent, just the tensor of face landmarks.
+
+#### Rendering the Avatar
+We use `WebGL` to render the avatar. We bind the chosen avatar image as a texture to the face geometry.
