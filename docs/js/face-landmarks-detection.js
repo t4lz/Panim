@@ -2,7 +2,7 @@
 
 var model = null
 var cbkOnFaceLandmarksDetected = null
-var ckbOnOnFaceLandmarksReady = null
+var cbkOnFaceLandmarksReady = null
 var imageCapture;
 
 /// UI.
