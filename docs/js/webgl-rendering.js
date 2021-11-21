@@ -68,7 +68,7 @@ let GetProgramInfo = (shaderProgram) => {
     }
 }
 
-/// Populate buffer and texture data
+/// Populate buffer and texture data.
 
 let PopulateTexture = (url) => {
     if (!texture)
@@ -100,14 +100,14 @@ let PopulatePositionBuffer = (positions) => {
     if (!positionBuffer)
         positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
 }
 
 let PopulateTextureCoordBuffer = (textureCoords) => {
     if (!textureCoordBuffer)
         textureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.DYNAMIC_DRAW)
 }
 
 let PopulateIndexBuffer = (indices) => {
@@ -125,122 +125,23 @@ let LandmarksToPositionArray = (landmarks) => {
     return landmarks[0].scaledMesh.flat()
 }
 
+/// Rendering.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-let GetCanvasWebGL = () => $('#canvas-webgl')
-
-
-
-
-
-function InitWebGLStuff() {
-
-    console.log(FACE_MESH_POSITIONS.length)
-    console.log(FACE_MESH_TEXTURE_COORDS.length)
-    console.log(FACE_MESH_INDICES.length)
-
-
-
-    let canvas = GetCanvasWebGL().get(0)
-    gl = canvas.getContext('webgl')
-
-
-    let shaderProgram = CompileShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_PROGRAM);
-    let programInfo = GetProgramInfo(shaderProgram)
-
-    PopulateTexture(FACE_MESH_TEXTURE_URL)
-    PopulatePositionBuffer(FACE_MESH_POSITIONS)
-    PopulateTextureCoordBuffer(FACE_MESH_TEXTURE_COORDS)
-    PopulateIndexBuffer(FACE_MESH_INDICES)
-
-    Render(programInfo);
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var alpha = 0.0
-
-function Render(programInfo) {
-    alpha += 0.01
+let Render = (programInfo) => {
 
     // Clear canvas.
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clearColor(0.8, 0.8, 0.8, 1.0)
     gl.clearDepth(1.0)
     gl.enable(gl.DEPTH_TEST)
     gl.depthFunc(gl.LEQUAL)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // Create projection matrix.
-    let aspect = gl.canvas.clientWidth / gl.canvas.clientHeight
     let projectionMatrix = mat4.create()
-    mat4.perspective(projectionMatrix, 0.75, aspect, 0.001, 5000.0)
-        // mat4.ortho(projectionMatrix, -600, 600, -600, 600, -600, 600)
+    mat4.ortho(projectionMatrix, 0, VIDEO_SIZE, VIDEO_SIZE, 0, -10000, 10000)
 
     // Create view matrix.
     let modelViewMatrix = mat4.create();
-    // let dx = -FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[0]]
-    // let dy = -FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[1]]
-    // let dz = -400 - FACE_MESH_POSITIONS[FACE_MESH_NOSE_TIP_INDICES[2]]
-    mat4.scale(modelViewMatrix, modelViewMatrix, [1, -1, 1])
-    mat4.translate(modelViewMatrix, modelViewMatrix, [-100, -100, -1000])
 
     // Propagate the vertex positions.
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
@@ -278,4 +179,27 @@ function Render(programInfo) {
 
     // On to the next frame.
     requestAnimationFrame(() => Render(programInfo))
+}
+
+/// UI.
+
+let GetCanvasOther = () => $('#canvas-other')
+
+/// Initialization.
+
+function InitWebGLStuff() {
+    let canvas = GetCanvasOther().get(0)
+    gl = canvas.getContext('webgl')
+
+    // Compile, link, and describe the shader program.
+    let shaderProgram = CompileShaderProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_PROGRAM);
+    let programInfo = GetProgramInfo(shaderProgram)
+
+    PopulateTexture(FACE_MESH_TEXTURE_URL)
+    PopulateTextureCoordBuffer(FACE_MESH_TEXTURE_COORDS)
+    PopulateIndexBuffer(FACE_MESH_INDICES)
+    PopulatePositionBuffer(FACE_MESH_POSITIONS)
+
+    // Start rendering.
+    Render(programInfo);
 }

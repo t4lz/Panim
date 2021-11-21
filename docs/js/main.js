@@ -1,3 +1,5 @@
+const VIDEO_SIZE = 500;
+
 let Assert = (condition, msg) => {
     if (!condition) throw msg
 }
@@ -16,7 +18,7 @@ let OnConnect = (userId) => {
 }
 
 let OnReceive = (data) => {
-    PrintLog("Received '" + JSON.stringify(data) + "'")
+    PopulatePositionBuffer(data.positions)
 }
 
 let OnFaceLandmarksReady = () => {
@@ -24,8 +26,10 @@ let OnFaceLandmarksReady = () => {
 }
 
 let OnFaceLandmarksDetected = (landmarks) => {
-    Send(landmarks)
-    PopulatePositionBuffer(LandmarksToPositionArray(landmarks))
+    let data = {
+        positions: LandmarksToPositionArray(landmarks),
+    }
+    Send(data)
 }
 
 $(document).ready(() => {

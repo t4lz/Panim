@@ -38,8 +38,6 @@ let PredictFaceLandmarks = async() => {
 
 /// Initialization.
 
-const VIDEO_SIZE = 500;
-
 let InitCamera = async() => {
     let domVideoSelf = GetVideoSelf().get(0)
 
