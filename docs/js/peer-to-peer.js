@@ -4,6 +4,7 @@ var peer = null
 var conn = null
 var cbkOnConnect = null
 var cbkOnReceive = null
+var peerAvatar = null;
 
 // Manage connection, sending, and receiving.
 
@@ -21,6 +22,8 @@ let OnConnData = (data) => {
     console.log("Received '" + data + "'")
     if ('snapshot' in data) {
         console.log("got snapshot!")
+        console.log(data.snapshot);
+        SetNewTextureFromBlob(data.snapshot);
     }
     if (cbkOnReceive)
         cbkOnReceive(data)
@@ -110,6 +113,16 @@ let UpdateUrlToShare = (userId) => {
     let loc = window.location
     let url = loc.protocol + "//" + loc.host + loc.pathname + "?id=" + userId
     $('#url-to-share').val(url)
+}
+
+let SetNewTextureFromBlob = (blob) => {
+    console.log('Setting new texture from blob:')
+    console.log(blob)
+    peerAvatar = new Blob([blob]);
+    // adapted from https://stackoverflow.com/a/27737668
+    var urlCreator = window.URL || window.webkitURL;
+    var imageUrl = urlCreator.createObjectURL(peerAvatar);
+    PopulateTexture(imageUrl);
 }
 
 /// Initialization.

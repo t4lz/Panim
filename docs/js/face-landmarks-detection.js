@@ -15,10 +15,32 @@ let OnClickTakeSnapshot = () => {
     console.log("snapshot button clicked");
     imageCapture.grabFrame()
         .then(imageBitmap => {
-            console.log(imageBitmap)
-            Send({snapshot: new Blob([imageBitmap])})
-        })
-        .catch(error => console.log(error));
+            console.log(imageBitmap);
+            return new Promise(res => {
+                // create a canvas
+                const canvas = document.createElement('canvas');
+                // resize it to the size of our ImageBitmap
+                canvas.width = imageBitmap.width;
+                canvas.height = imageBitmap.height;
+                // try to get a bitmaprenderer context
+                let ctx = canvas.getContext('bitmaprenderer');
+                if(ctx) {
+                    // transfer the ImageBitmap to it
+                    ctx.transferFromImageBitmap(imageBitmap);
+                }
+                else {
+                    // in case someone supports createImageBitmap only
+                    // twice in memory...
+                    canvas.getContext('2d').drawImage(imageBitmap,0,0);
+                }
+                // get it back as a Blob
+                return canvas.toBlob(res);
+            });
+        }).then(blob => {
+        console.log('blob:');
+        console.log(blob);
+        Send({snapshot: blob});
+    }).catch(error => console.log(error));
 }
 
 
