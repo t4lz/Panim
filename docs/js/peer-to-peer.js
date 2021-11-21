@@ -11,11 +11,17 @@ let Send = (data) => {
     if (!conn || !conn.open)
         return false
     conn.send(data)
+    if ('snapshot' in data) {
+        console.log("sent snapshot!")
+    }
     return true
 }
 
 let OnConnData = (data) => {
     console.log("Received '" + data + "'")
+    if ('snapshot' in data) {
+        console.log("got snapshot!")
+    }
     if (cbkOnReceive)
         cbkOnReceive(data)
 }

@@ -3,10 +3,24 @@
 var model = null
 var cbkOnFaceLandmarksDetected = null
 var ckbOnOnFaceLandmarksReady = null
+var imageCapture;
 
 /// UI.
 
+let GetBtnTakeSnapshot = () => $('#btn-take-snapshot')
+
 let GetVideoSelf = () => $("#video-self")
+
+let OnClickTakeSnapshot = () => {
+    console.log("snapshot button clicked");
+    imageCapture.grabFrame()
+        .then(imageBitmap => {
+            console.log(imageBitmap)
+            Send({snapshot: new Blob([imageBitmap])})
+        })
+        .catch(error => console.log(error));
+}
+
 
 /// Main loop to predict facial landmarks.
 
@@ -28,14 +42,18 @@ const VIDEO_SIZE = 500;
 
 let InitCamera = async() => {
     let domVideoSelf = GetVideoSelf().get(0)
-    domVideoSelf.srcObject = await navigator.mediaDevices.getUserMedia({
+
+    mediaStream = await navigator.mediaDevices.getUserMedia({
         'audio': false,
         'video': {
             facingMode: 'user',
             width: VIDEO_SIZE,
             height: VIDEO_SIZE
         },
-    })
+    });
+    domVideoSelf.srcObject = mediaStream;
+    const track = mediaStream.getVideoTracks()[0];
+    imageCapture = new ImageCapture(track);
     return new Promise((resolve) => {
         domVideoSelf.onloadedmetadata = () => {
             domVideoSelf.play()
@@ -55,6 +73,7 @@ let InitModel = async() => {
 let InitFaceLandmarksDetection = async(OnFaceLandmarksReady, OnFaceLandmarksDetected) => {
     cbkOnFaceLandmarksReady = OnFaceLandmarksReady
     cbkOnFaceLandmarksDetected = OnFaceLandmarksDetected
+    GetBtnTakeSnapshot().click(OnClickTakeSnapshot);
 
     // Initialize asynchronously and wait for completion.
     let modelPromise = InitModel()
