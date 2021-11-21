@@ -6,7 +6,7 @@ This is developed as a part of [Hackatum](https://hack.tum.de "Hackatum's Websit
 Panim is a new form of communication. It is a lot more interactive than just a phone call, but not quite as intensive as a video call.
 An avatar is used to represent you in the call. Your camera is used locally to detect your facial expressions and motion, but the video is not actually sent to your peers, just your face landmarks - 468 points that describe your current expression.
 
-## Vision
+## Motivation
 Video calls bring some difficalty to many interactions, and we want to bridge those gaps, without giving up the more personal feeling of a video call.
 But with this technology does not merely address the problems of video conferencing it also opens a whole new world of possibilities.
 
