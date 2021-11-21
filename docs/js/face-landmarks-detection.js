@@ -7,12 +7,38 @@ var imageCapture = null;
 var myAvatarCanvas = null;
 var myAvatarBlob = null;
 var myAvatarCoords = null;
+var hybridModeInterval = null;
 
 /// UI.
 
 let GetBtnTakeSnapshot = () => $('#btn-take-snapshot')
 
 let GetVideoSelf = () => $("#video-self")
+
+let GetHybridModeSwitch = () => $("#hybrid-mode-switch")
+
+let OnHybridModeChange = (event) => {
+    console.log("Hybrid mode: " + event.target.checked);
+    if (event.target.checked) {
+        OnStartHybridMode();
+    } else {
+        OnStopHybridMode();
+    }
+}
+
+let OnStartHybridMode = () => {
+    myHybridMode = true;
+    SendStartHybrid();
+    hybridModeInterval = window.setInterval(function(){
+        OnClickTakeSnapshot();
+    }, 1000);
+}
+
+let OnStopHybridMode = () => {
+    myHybridMode = false;
+    clearInterval(hybridModeInterval);
+    SendStopHybrid();
+}
 
 let OnClickTakeSnapshot = () => {
     console.log("snapshot button clicked");
@@ -108,6 +134,7 @@ let InitFaceLandmarksDetection = async(OnFaceLandmarksReady, OnFaceLandmarksDete
     cbkOnFaceLandmarksReady = OnFaceLandmarksReady
     cbkOnFaceLandmarksDetected = OnFaceLandmarksDetected
     GetBtnTakeSnapshot().click(OnClickTakeSnapshot);
+    GetHybridModeSwitch().click(OnHybridModeChange);
 
     // Initialize asynchronously and wait for completion.
     let modelPromise = InitModel()

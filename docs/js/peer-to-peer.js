@@ -5,6 +5,8 @@ var conn = null
 var cbkOnConnect = null
 var cbkOnReceive = null
 var peerAvatar = null;
+var myHybridMode = false;
+var peerHybridMode = false;
 
 // Manage connection, sending, and receiving.
 
@@ -29,6 +31,9 @@ let OnConnData = (data) => {
     if ('coordinates' in data) {
         console.log(data.coordinates);
         PopulateTextureCoordBuffer(data.coordinates);
+    }
+    if ('hybrid' in data) {
+        peerHybridMode = data.hybrid;
     }
     if (cbkOnReceive)
         cbkOnReceive(data)
@@ -78,6 +83,14 @@ let OnIncomingCall = (call) => {
     });
     call.on('stream', OnIncomingStream);
     SendMyAvatar();
+}
+
+let SendStartHybrid = () => {
+    Send({hybrid: true});
+}
+
+let SendStopHybrid = () => {
+    Send({hybrid: false});
 }
 
 let SendMyAvatar = () => {
@@ -136,6 +149,12 @@ let SetNewTextureFromBlob = (blob) => {
     var urlCreator = window.URL || window.webkitURL;
     var imageUrl = urlCreator.createObjectURL(peerAvatar);
     PopulateTexture(imageUrl);
+    if (peerHybridMode) {
+        var canvas = document.getElementById('canvas-other');
+        var img = new Image();
+        img.src = imageUrl;
+        canvas.getContext('2d').drawImage(img,0,0);
+    }
 }
 
 /// Initialization.
